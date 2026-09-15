@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vue.js Basics — Materi Interaktif</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+<style>
+  :root{
+    --ink:#0f1720;
+    --paper:#eef1ee;
+    --panel:#182028;
+    --panel-2:#1f2933;
+    --line:#2c3844;
+    --bind:#5eb1ff;
+    --if:#ff9d5c;
+    --show:#c792ea;
+    --for:#42d19b;
+    --muted:#8a97a3;
+    --code-bg:#0d1218;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Söhne","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    line-height:1.5;
+  }
+  .mono{
+    font-family:"JetBrains Mono","SF Mono",Consolas,"Courier New",monospace;
+  }
+
+  /* ---- top bar ---- */
+  .topbar{
+    position:sticky; top:0; z-index:50;
+    background:var(--ink);
+    border-bottom:1px solid #000;
+  }
+  .topbar-inner{
+    max-width:980px; margin:0 auto;
+    display:flex; align-items:center; gap:22px;
+    padding:14px 20px;
+  }
+  .brand{
+    color:#fff; font-weight:700; font-size:15px; letter-spacing:.2px;
+    display:flex; align-items:center; gap:8px; white-space:nowrap;
+  }
+  .brand-dot{width:9px;height:9px;border-radius:50%;background:var(--for);}
+  .tabs{display:flex; gap:4px; flex-wrap:wrap;}
+  .tab{
+    appearance:none; border:1px solid transparent; background:transparent;
+    color:var(--muted); font-size:13.5px; font-weight:600;
+    padding:7px 12px; border-radius:7px; cursor:pointer;
+    font-family:inherit;
+    transition:background .15s ease, color .15s ease;
+  }
+  .tab:hover{ color:#fff; background:rgba(255,255,255,.06); }
+  .tab.active{ color:var(--ink); }
+  .tab[data-c="bind"].active{ background:var(--bind); }
+  .tab[data-c="if"].active{ background:var(--if); }
+  .tab[data-c="show"].active{ background:var(--show); }
+  .tab[data-c="for"].active{ background:var(--for); }
+
+  /* ---- hero ---- */
+  .hero{ max-width:820px; margin:0 auto; padding:52px 20px 30px; }
+  .hero .kicker{
+    font-size:13px; color:var(--muted); font-weight:600;
+  }
+  .hero h1{
+    font-size:clamp(30px,4.5vw,44px); line-height:1.08; margin:10px 0 14px;
+    letter-spacing:-0.02em;
+  }
+  .hero h1 .accent-bind{color:#2f7fd6;}
+  .hero h1 .accent-if{color:#c9722f;}
+  .hero h1 .accent-show{color:#8a4fc4;}
+  .hero h1 .accent-for{color:#1f9d6f;}
+  .hero p{ font-size:16.5px; color:#3a4550; max-width:620px; }
+
+  main{ max-width:980px; margin:0 auto; padding:10px 20px 100px; }
+
+  /* ---- section card ---- */
+  section.concept{
+    margin-top:56px; padding-top:8px;
+    scroll-margin-top:78px;
+  }
+  .concept-head{
+    display:flex; align-items:baseline; gap:12px; margin-bottom:6px;
+  }
+  .concept-num{
+    font-family:"JetBrains Mono",monospace; font-size:13px; color:var(--muted);
+  }
+  .concept-title{
+    font-size:26px; font-weight:700; margin:0; letter-spacing:-0.01em;
+  }
+  .pill{
+    display:inline-block; font-size:11.5px; font-weight:700; letter-spacing:.02em;
+    padding:2px 9px; border-radius:5px; color:#0f1720; margin-left:2px;
+  }
+  .pill.bind{background:var(--bind);}
+  .pill.if{background:var(--if);}
+  .pill.show{background:var(--show);}
+  .pill.for{background:var(--for);}
+
+  .concept-desc{ color:#3a4550; font-size:15.5px; max-width:680px; margin:10px 0 22px; }
+  .concept-desc code{
+    background:#e2e6e2; padding:1px 6px; border-radius:4px; font-size:13.5px;
+    font-family:"JetBrains Mono",monospace;
+  }
+
+  .demo-grid{
+    display:grid; grid-template-columns:1fr 1fr; gap:0;
+    border:1px solid var(--line); border-radius:10px; overflow:hidden;
+    background:var(--panel);
+  }
+  @media (max-width:760px){ .demo-grid{ grid-template-columns:1fr; } }
+
+  .pane{ padding:20px 22px; }
+  .pane + .pane{ border-left:1px solid var(--line); }
+  @media (max-width:760px){ .pane + .pane{ border-left:none; border-top:1px solid var(--line);} }
+
+  .pane-label{
+    font-size:11px; text-transform:uppercase; letter-spacing:.08em;
+    color:var(--muted); font-weight:700; margin-bottom:14px;
+    display:flex; align-items:center; gap:7px;
+  }
+  .pane-label .sq{width:7px;height:7px;border-radius:1.5px;}
+
+  .code-pane pre{
+    margin:0; background:var(--code-bg); border-radius:8px; padding:14px 16px;
+    font-family:"JetBrains Mono",monospace; font-size:12.8px; color:#c9d1d9;
+    overflow-x:auto; line-height:1.65;
+  }
+  .code-pane .k{color:#ff9d5c;}
+  .code-pane .a{color:#5eb1ff;}
+  .code-pane .s{color:#a5d6a7;}
+  .code-pane .c{color:#5c6773;}
+  .code-pane .t{color:#c792ea;}
+
+  .live-pane{ color:#dfe6ec; }
+  .live-surface{
+    background:var(--panel-2); border:1px solid var(--line); border-radius:8px;
+    padding:22px; min-height:150px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:16px; text-align:center;
+  }
+  .controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center; margin-top:14px;}
+  button.demo-btn{
+    font-family:inherit; font-size:13px; font-weight:600; cursor:pointer;
+    border-radius:7px; border:1px solid var(--line); padding:8px 14px;
+    background:#0f1720; color:#dfe6ec; transition:filter .12s ease;
+  }
+  button.demo-btn:hover{ filter:brightness(1.25); }
+  button.demo-btn.on{ color:#0f1720; border-color:transparent; }
+
+  input[type=text]{
+    font-family:inherit; font-size:13.5px; padding:8px 10px;
+    border-radius:7px; border:1px solid var(--line); background:#0f1720; color:#dfe6ec;
+    width:100%; max-width:220px;
+  }
+  input[type=range]{ width:100%; max-width:220px; }
+  input[type=color]{ width:44px; height:32px; border:none; border-radius:6px; background:none; cursor:pointer; }
+
+  .box-preview{
+    width:120px; height:80px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:"JetBrains Mono",monospace; font-size:12px; color:#0f1720; font-weight:700;
+    transition:background-color .15s ease, transform .12s ease, width .2s ease;
+  }
+
+  ul.item-list{ list-style:none; margin:0; padding:0; width:100%; max-width:280px; text-align:left; }
+  ul.item-list li{
+    background:#0f1720; border:1px solid var(--line); border-radius:7px;
+    padding:9px 12px; margin-bottom:7px; font-size:13.5px;
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+  }
+  ul.item-list li .rm{
+    cursor:pointer; color:var(--muted); font-size:15px; line-height:1;
+  }
+  ul.item-list li .rm:hover{ color:#ff9d5c; }
+
+  .dom-count{
+    font-family:"JetBrains Mono",monospace; font-size:12px; color:var(--muted);
+    border-top:1px dashed var(--line); margin-top:16px; padding-top:12px; width:100%;
+  }
+  .dom-count b{ color:#dfe6ec; }
+
+  .subhead{
+    font-size:18px; font-weight:700; margin:34px 0 8px; letter-spacing:-0.01em;
+  }
+  ol.steps{
+    color:#3a4550; font-size:14.5px; max-width:640px; margin:0 0 20px; padding-left:20px;
+  }
+  ol.steps li{ margin-bottom:4px; }
+  .key-list li{ display:flex; align-items:center; gap:10px; text-align:left; }
+  .key-list .tag{
+    background:var(--for); color:#0f1720; font-weight:700; font-size:11px;
+    padding:3px 8px; border-radius:5px; min-width:18px; text-align:center; flex-shrink:0;
+  }
+  input.key-input{ flex:1; max-width:none; }
+
+  .callout{
+    margin-top:22px; padding:14px 16px; border-radius:8px;
+    background:#e4ece7; border:1px solid #cfe0d6; font-size:14px; color:#2d3f34;
+  }
+  .callout b{ color:#17301f; }
+
+  footer{
+    max-width:980px; margin:0 auto; padding:0 20px 60px; color:var(--muted); font-size:13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand"><span class="brand-dot"></span> vue-basics.live</div>
+    <div class="tabs" id="navtabs">
+      <button class="tab" data-c="bind" onclick="jump('bind')">v-bind</button>
+      <button class="tab" data-c="if" onclick="jump('vif')">v-if</button>
+      <button class="tab" data-c="show" onclick="jump('vshow')">v-show</button>
+      <button class="tab" data-c="for" onclick="jump('vfor')">v-for</button>
+    </div>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>Empat directive yang <span class="accent-bind">mengikat</span>,
+    <span class="accent-if">menyembunyikan</span>,
+    <span class="accent-show">menampilkan</span>, dan
+    <span class="accent-for">mengulang</span>.</h1>
+  <p>Geser slider, klik tombol, ubah teks — setiap demo di bawah ini adalah aplikasi Vue 3 yang benar-benar hidup, bukan sekadar ilustrasi. Kodenya persis seperti yang tampil di panel sebelah kanan.</p>
+</div>
+
+<main>
+
+  <!-- ============ V-BIND ============ -->
+  <section class="concept" id="bind">
+    <div class="concept-head">
+      <span class="concept-num">01</span>
+      <h2 class="concept-title">v-bind <span class="pill bind">DATA → ATRIBUT</span></h2>
+    </div>
+    <p class="concept-desc">
+      <code>v-bind</code> (disingkat <code>:</code>) menghubungkan sebuah atribut HTML — seperti <code>style</code>, <code>class</code>, atau <code>src</code> — ke sebuah nilai di data Vue. Saat nilainya berubah, atribut ikut berubah otomatis, tanpa perlu menyentuh DOM secara manual.
+    </p>
+    <div class="demo-grid">
+      <div class="pane live-pane" id="app-bind">
+        <div class="pane-label"><span class="sq" style="background:var(--bind)"></span>LIVE PREVIEW</div>
+        <div class="live-surface">
+          <div class="box-preview" :style="{ backgroundColor: color, width: size + 'px' }">
+            {{ size }}px
+          </div>
+          <div class="controls">
+            <input type="color" v-model="color">
+            <input type="range" min="80" max="200" v-model="size">
+          </div>
+        </div>
+      </div>
+      <div class="pane code-pane">
+        <div class="pane-label"><span class="sq" style="background:var(--bind)"></span>KODE</div>
+        <pre><span class="c">&lt;!-- warna &amp; lebar terikat ke data --&gt;</span>
+&lt;<span class="t">div</span>
+  <span class="a">:style</span>=<span class="s">"{
+    backgroundColor: color,
+    width: size + 'px'
+  }"</span>&gt;
+  {{ size }}px
+&lt;/<span class="t">div</span>&gt;
+
+&lt;<span class="t">input</span> <span class="a">type</span>=<span class="s">"color"</span> <span class="a">v-model</span>=<span class="s">"color"</span>&gt;
+&lt;<span class="t">input</span> <span class="a">type</span>=<span class="s">"range"</span> <span class="a">v-model</span>=<span class="s">"size"</span>&gt;</pre>
+      </div>
+    </div>
+    <div class="callout"><b>Inti:</b> <code>v-bind</code> mengubah atribut, bukan menyembunyikan atau mengulang elemen. Ini fondasi untuk semua binding dinamis di Vue — termasuk <code>:class</code> dan <code>:src</code>.</div>
+  </section>
+
+  <!-- ============ V-IF ============ -->
+  <section class="concept" id="vif">
+    <div class="concept-head">
+      <span class="concept-num">02</span>
+      <h2 class="concept-title">v-if <span class="pill if">TAMBAH / HAPUS DOM</span></h2>
+    </div>
+    <p class="concept-desc">
+      <code>v-if</code> benar-benar menambahkan atau menghapus elemen dari DOM tergantung kondisinya. Saat kondisi <code>false</code>, elemen itu <b>tidak ada sama sekali</b> di halaman — bukan disembunyikan, tapi dihapus.
+    </p>
+    <div class="demo-grid">
+      <div class="pane live-pane" id="app-if">
+        <div class="pane-label"><span class="sq" style="background:var(--if)"></span>LIVE PREVIEW</div>
+        <div class="live-surface">
+          <div v-if="tampil" class="box-preview" style="background:var(--if)">Elemen ADA</div>
+          <p v-else style="color:var(--muted); font-size:13px;">— elemen dihapus dari DOM —</p>
+          <div class="controls">
+            <button class="demo-btn" :class="{on: tampil}" :style="tampil ? {background:'var(--if)'} : {}" @click="tampil = !tampil">
+              {{ tampil ? 'Sembunyikan (hapus dari DOM)' : 'Tampilkan (tambah ke DOM)' }}
+            </button>
+          </div>
+          <div class="dom-count">Elemen kotak ada di DOM: <b>{{ tampil ? 'YA' : 'TIDAK (dihapus)' }}</b></div>
+        </div>
+      </div>
+      <div class="pane code-pane">
+        <div class="pane-label"><span class="sq" style="background:var(--if)"></span>KODE</div>
+        <pre><span class="t">div</span> <span class="a">v-if</span>=<span class="s">"tampil"</span>&gt;
+  Elemen ADA
+&lt;/<span class="t">div</span>&gt;
+&lt;<span class="t">p</span> <span class="a">v-else</span>&gt;
+  Elemen TIDAK ADA di DOM
+&lt;/<span class="t">p</span>&gt;
+
+&lt;<span class="t">button</span> <span class="a">@click</span>=<span class="s">"tampil = !tampil"</span>&gt;
+  Toggle
+&lt;/<span class="t">button</span>&gt;</pre>
+      </div>
+    </div>
+    <div class="callout"><b>Inti:</b> Cocok untuk kondisi yang <i>jarang berubah</i> (misalnya role user, hasil login) karena ada biaya render/hapus ulang tiap kali kondisi berganti.</div>
+  </section>
+
+  <!-- ============ V-SHOW ============ -->
+  <section class="concept" id="vshow">
+    <div class="concept-head">
+      <span class="concept-num">03</span>
+      <h2 class="concept-title">v-show <span class="pill show">CSS DISPLAY</span></h2>
+    </div>
+    <p class="concept-desc">
+      <code>v-show</code> selalu me-render elemennya ke DOM — yang berubah hanya CSS <code>display: none</code>. Elemen tetap "ada", cuma disembunyikan secara visual. Bandingkan langsung dengan <code>v-if</code> di atas.
+    </p>
+    <div class="demo-grid">
+      <div class="pane live-pane" id="app-show">
+        <div class="pane-label"><span class="sq" style="background:var(--show)"></span>LIVE PREVIEW</div>
+        <div class="live-surface">
+          <div v-show="tampil" class="box-preview" style="background:var(--show)">Elemen ADA (tersembunyi via CSS)</div>
+          <div class="controls">
+            <button class="demo-btn" :class="{on: tampil}" :style="tampil ? {background:'var(--show)'} : {}" @click="tampil = !tampil">
+              {{ tampil ? 'display: none' : 'display: block' }}
+            </button>
+          </div>
+          <div class="dom-count">Elemen kotak ada di DOM: <b>YA (selalu)</b> · Terlihat: <b>{{ tampil ? 'YA' : 'TIDAK' }}</b></div>
+        </div>
+      </div>
+      <div class="pane code-pane">
+        <div class="pane-label"><span class="sq" style="background:var(--show)"></span>KODE</div>
+        <pre>&lt;<span class="t">div</span> <span class="a">v-show</span>=<span class="s">"tampil"</span>&gt;
+  Elemen ADA (tersembunyi via CSS)
+&lt;/<span class="t">div</span>&gt;
+
+<span class="c">&lt;!-- selalu di-render;
+     hanya style="display:none"
+     yang berubah --&gt;</span></pre>
+      </div>
+    </div>
+    <div class="callout"><b>Inti:</b> Lebih efisien untuk toggle yang <i>sering berubah</i> (tab, dropdown, accordion) karena elemen tidak dibuat-ulang, hanya disembunyikan.</div>
+  </section>
+
+  <!-- ============ V-FOR ============ -->
+  <section class="concept" id="vfor">
+    <div class="concept-head">
+      <span class="concept-num">04</span>
+      <h2 class="concept-title">v-for <span class="pill for">RENDER LIST</span></h2>
+    </div>
+    <p class="concept-desc">
+      <code>v-for</code> mengulang sebuah elemen untuk tiap item dalam array. Setiap item butuh atribut <code>:key</code> yang unik, supaya Vue tahu persis elemen mana yang berubah saat list-nya di-update.
+    </p>
+    <div class="demo-grid">
+      <div class="pane live-pane" id="app-for">
+        <div class="pane-label"><span class="sq" style="background:var(--for)"></span>LIVE PREVIEW</div>
+        <div class="live-surface">
+          <ul class="item-list">
+            <li v-for="item in items" :key="item.id">
+              {{ item.text }}
+              <span class="rm" @click="hapus(item.id)">✕</span>
+            </li>
+          </ul>
+          <div class="controls">
+            <input type="text" v-model="baru" placeholder="Tulis item baru..." @keyup.enter="tambah">
+            <button class="demo-btn on" style="background:var(--for)" @click="tambah">+ Tambah</button>
+          </div>
+          <div class="dom-count">Jumlah item: <b>{{ items.length }}</b></div>
+        </div>
+      </div>
+      <div class="pane code-pane">
+        <div class="pane-label"><span class="sq" style="background:var(--for)"></span>KODE</div>
+        <pre>&lt;<span class="t">ul</span>&gt;
+  &lt;<span class="t">li</span>
+    <span class="a">v-for</span>=<span class="s">"item in items"</span>
+    <span class="a">:key</span>=<span class="s">"item.id"</span>&gt;
+    {{ item.text }}
+  &lt;/<span class="t">li</span>&gt;
+&lt;/<span class="t">ul</span>&gt;
+
+<span class="c">// data</span>
+<span class="k">const</span> items = [
+  { id: <span class="s">1</span>, text: <span class="s">'Belajar Vue'</span> },
+  { id: <span class="s">2</span>, text: <span class="s">'Coba v-for'</span> }
+]</pre>
+      </div>
+    </div>
+    <div class="callout"><b>Inti:</b> Tanpa <code>:key</code> yang stabil, Vue bisa salah "mengenali" elemen mana yang berpindah saat list berubah — sering jadi sumber bug UI yang membingungkan.</div>
+
+    <div class="subhead">Bonus: apa bedanya <span class="mono">:key="item.id"</span> vs <span class="mono">:key="index"</span> (atau tanpa key)?</div>
+    <p class="concept-desc">
+      Vue butuh <code>:key</code> untuk mencocokkan elemen DOM lama dengan data baru saat list berubah urutannya. Kalau key-nya <b>stabil</b> (mis. <code>item.id</code>), Vue tahu persis "elemen mana pindah ke mana". Kalau key-nya <b>tidak stabil</b> — pakai <code>index</code>, atau tanpa <code>:key</code> sama sekali — Vue hanya mencocokkan berdasarkan <i>posisi</i>, bukan identitas item. Efeknya baru kelihatan saat ada elemen dengan state di luar data reaktif, misalnya teks yang sedang diketik di input. Coba sendiri di bawah ini:
+    </p>
+    <ol class="steps">
+      <li>Ketik teks yang berbeda-beda di tiap kotak input (misal "satu", "dua", "tiga").</li>
+      <li>Klik <b>"Tambah item baru di atas"</b>, lalu perhatikan ke mana teks ketikanmu ikut pindah.</li>
+    </ol>
+    <div class="pane live-pane" id="app-forkey" style="border:1px solid var(--line); border-radius:10px; background:var(--panel);">
+      <div class="pane-label"><span class="sq" style="background:var(--for)"></span>LIVE PREVIEW — coba ganti mode key-nya</div>
+      <div class="live-surface" style="align-items:stretch;">
+        <div class="controls" style="justify-content:flex-start; margin-top:0;">
+          <button class="demo-btn" :class="{on: useIdKey}" :style="useIdKey ? {background:'var(--for)'} : {}" @click="useIdKey = !useIdKey; resetKey++">
+            Mode: {{ useIdKey ? ':key="item.id" (stabil)' : ':key="index" (tidak stabil)' }}
+          </button>
+          <button class="demo-btn" @click="tambahAtas">+ Tambah item baru di atas</button>
+          <button class="demo-btn" @click="reset">↺ Reset</button>
+        </div>
+        <ul class="item-list key-list" :key="resetKey" style="max-width:360px; margin-top:16px;">
+          <li v-for="(item, idx) in items" :key="useIdKey ? item.id : idx">
+            <span class="tag">{{ item.label }}</span>
+            <input type="text" class="key-input" placeholder="ketik sesuatu...">
+          </li>
+        </ul>
+        <div class="dom-count" style="border-top:none; margin-top:4px; padding-top:0;">
+          <span v-if="useIdKey">Karena key mengikuti <b>identitas item</b> (id), teks ketikanmu tetap menempel pada item yang sama meski posisinya bergeser ke bawah.</span>
+          <span v-else>Karena key mengikuti <b>posisi</b> (index), Vue menyamakan input lama dengan urutan baru apa adanya — teks ketikanmu tertinggal di posisi lama, jadi terlihat "tertukar" ke item yang salah.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+  function jump(id){
+    document.getElementById(id === 'bind' ? 'bind' : id).scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  // v-bind demo
+  Vue.createApp({
+    data(){ return { color:'#5eb1ff', size:120 }; }
+  }).mount('#app-bind');
+
+  // v-if demo
+  Vue.createApp({
+    data(){ return { tampil:true }; }
+  }).mount('#app-if');
+
+  // v-show demo
+  Vue.createApp({
+    data(){ return { tampil:true }; }
+  }).mount('#app-show');
+
+  // v-for demo
+  Vue.createApp({
+    data(){
+      return {
+        items:[
+          {id:1, text:'Belajar v-bind'},
+          {id:2, text:'Belajar v-if & v-show'},
+          {id:3, text:'Belajar v-for'}
+        ],
+        baru:'',
+        nextId:4
+      };
+    },
+    methods:{
+      tambah(){
+        const t = this.baru.trim();
+        if(!t) return;
+        this.items.push({id:this.nextId++, text:t});
+        this.baru='';
+      },
+      hapus(id){
+        this.items = this.items.filter(i => i.id !== id);
+      }
+    }
+  }).mount('#app-for');
+
+  // v-for key comparison demo
+  Vue.createApp({
+    data(){
+      return {
+        items:[
+          {id:1, label:'A'},
+          {id:2, label:'B'},
+          {id:3, label:'C'}
+        ],
+        useIdKey:true,
+        resetKey:0,
+        nextId:4
+      };
+    },
+    methods:{
+      tambahAtas(){
+        this.items.unshift({id:this.nextId++, label:'Baru'});
+      },
+      reset(){
+        this.items = [
+          {id:1, label:'A'},
+          {id:2, label:'B'},
+          {id:3, label:'C'}
+        ];
+        this.nextId = 4;
+        this.resetKey++;
+      }
+    }
+  }).mount('#app-forkey');
+
+  // active tab on scroll
+  const sections = ['bind','vif','vshow','vfor'];
+  const tabs = document.querySelectorAll('.tab');
+  const setActive = (name) => {
+    tabs.forEach(t => t.classList.toggle('active', t.dataset.c === name));
+  };
+  const map = {bind:'bind', vif:'if', vshow:'show', vfor:'for'};
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ setActive(map[e.target.id]); }
+    });
+  }, {rootMargin:'-40% 0px -50% 0px'});
+  sections.forEach(id => { const el = document.getElementById(id); if(el) observer.observe(el); });
+  setActive('bind');
+</script>
+
+</body>
+</html>
